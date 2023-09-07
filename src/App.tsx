@@ -10,9 +10,12 @@ type TodosType = {
     completed: boolean
 }
 
+type FilterTasksType = 'all' | 'active' | 'completed';
+
 function App() {
     const [todos, setTodos] = useState<TodosType[]>([]);
-    let newTitle = useRef<HTMLInputElement>(null);
+    const [taskFilter, setTaskFilter] = useState<FilterTasksType>('all');
+    const newTitle = useRef<HTMLInputElement>(null);
     const fetchFunc = () => {
         fetch('https://jsonplaceholder.typicode.com/todos')
             .then(response => response.json())
@@ -21,6 +24,24 @@ function App() {
     useEffect(() => {
         fetchFunc();
     }, []);
+
+    let filteredTasks = todos;
+
+    if(taskFilter === 'all') {
+        filteredTasks = todos;
+        console.log(filteredTasks);
+    }
+    if (taskFilter === 'active') {
+        filteredTasks = todos.filter(t => !t.completed);
+    }
+    if (taskFilter === 'completed') {
+        filteredTasks = todos.filter(t => t.completed);
+    }
+
+    const changeFilter = (filterValue: FilterTasksType) => {
+        setTaskFilter(filterValue);
+    }
+
 
     const removeTodolist = () => {
         setTodos([]);
@@ -37,7 +58,7 @@ function App() {
         }
     }
 
-    const mappedTodos = todos.map(el => {
+    const mappedTodos = filteredTasks.map(el => {
         return (
             <li key={el.id}>
                 <span>{el.id} - </span>
@@ -59,6 +80,9 @@ function App() {
                 <Input newTitle={newTitle} callback={addNewTask}/>
                 <Button name='+' callback={addNewTask} />
             </div>
+            <button onClick={() => changeFilter('all')}>All</button>
+            <button onClick={() => changeFilter('active')}>Active</button>
+            <button onClick={() => changeFilter('completed')}>Completed</button>
             <ul>
                 {mappedTodos}
             </ul>
